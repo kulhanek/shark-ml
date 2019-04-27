@@ -44,7 +44,7 @@ mark_as_advanced(
 #####################################################################
 # Static/Shared libraries
 #####################################################################
-option(BUILD_SHARED_LIBS "Compile shark into a dynamic library instead of a static one." OFF)
+option(BUILD_SHARED_LIBS "Compile shark into a dynamic library instead of a static one." ON)
 if(BUILD_SHARED_LIBS)
 	set(SHARK_USE_DYNLIB 1)
 endif()
@@ -133,7 +133,7 @@ message(STATUS "Will build: " ${CMAKE_BUILD_TYPE})
 #           Boost configuration
 #####################################################################
 set(Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
-set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_MULTITHREADED OFF)
 add_definitions(-DBOOST_PARAMETER_MAX_ARITY=15)
 add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
 add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
@@ -170,7 +170,7 @@ message( STATUS "Using boost from " ${Boost_LIBRARY_DIR} )
 #####################################################################
 #		OpenMP
 #####################################################################
-option( ENABLE_OPENMP "Enable OpenMP" ON )
+option( ENABLE_OPENMP "Enable OpenMP" OFF )
 if( ENABLE_OPENMP )
 	find_package( OpenMP QUIET )
 	if( OPENMP_FOUND )
@@ -413,7 +413,7 @@ add_subdirectory( src )
 #####################################################################
 #                       Include Examples
 #####################################################################
-option( BUILD_EXAMPLES "Build example programs." ON )
+option( BUILD_EXAMPLES "Build example programs." OFF )
 add_subdirectory( examples )
 
 #####################################################################
