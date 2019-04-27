@@ -414,16 +414,21 @@ add_subdirectory( src )
 #                       Include Examples
 #####################################################################
 option( BUILD_EXAMPLES "Build example programs." OFF )
-add_subdirectory( examples )
+if(BUILD_EXAMPLES)
+  add_subdirectory( examples )
+endif()
 
 #####################################################################
 #                       Include Unit Tests
 #####################################################################
 # Enable Testing
-include(CTest)
-if(BUILD_TESTING)
+option( BUILD_TESTS "Build tests." OFF )
+if(BUILD_TESTS)
+    include(CTest)
+    if(BUILD_TESTING)
 	enable_testing()
 	add_subdirectory( Test )
+    endif()
 endif()
 
 #####################################################################
