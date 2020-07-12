@@ -266,7 +266,7 @@ if( ENABLE_CBLAS )
             message(STATUS "CBLAS Vendor: ... testing MKL")
 			try_compile(CBLAS_COMPILE 
 				"${PROJECT_BINARY_DIR}/cBlasCheck"
-				"${CMAKE_SOURCE_DIR}/cBlasCheck.cpp"
+				"${CMAKE_CURRENT_SOURCE_DIR}/cBlasCheck.cpp"
 				CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${CBLAS_INCLUDE_PATH}"
 				LINK_LIBRARIES ${CBLAS_LIBRARIES}
 			)
