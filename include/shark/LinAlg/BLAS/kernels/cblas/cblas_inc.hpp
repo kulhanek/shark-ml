@@ -68,7 +68,7 @@ extern "C" {
 #else
 
 extern "C" {
-#include <cblas.h>
+#include <mkl_cblas.h>
 }
 
 #endif

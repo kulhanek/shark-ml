@@ -1,5 +1,5 @@
 extern "C"{
-#include <cblas.h>
+#include <mkl_cblas.h>
 }
 int main(){
 	float* x;

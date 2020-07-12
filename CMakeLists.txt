@@ -226,62 +226,54 @@ if( ENABLE_SIMD )
 endif()
 
 option( ENABLE_CBLAS "Use Installed Linear Algebra Library" ON )
-set(CBLAS_LIBRARY_PATH "/usr/lib64/" CACHE PATH "Linear algebra library path")
-set(CBLAS_INCLUDE_PATH "/usr/include/" CACHE PATH "Linear algebra include path")
+SET(MKL_HOME "$ENV{MKL_HOME}")
+IF(MKL_HOME)
+    message(STATUS "MKL Home: ${MKL_HOME}")
+    set(CBLAS_LIBRARY_PATH ${MKL_HOME}/lib/intel64)
+    set(CBLAS_INCLUDE_PATH ${MKL_HOME}/include)
+    set(CBLAS_VENDOR MKL)
+ELSE()
+    set(CBLAS_LIBRARY_PATH "/usr/lib64/" CACHE PATH "Linear algebra library path")
+    set(CBLAS_INCLUDE_PATH "/usr/include/" CACHE PATH "Linear algebra include path")
+ENDIF()
 if( ENABLE_CBLAS )
-	set(CBLAS_VENDOR FALSE)
-	if( APPLE )
-		set(CBLAS_VENDOR "Accelerate")
-		set(CBLAS_INCLUDES "")
-		set(CBLAS_LIBRARIES "-framework Accelerate" )
-	else()
-		#todo: do a propper vendor check
-		find_library(OPENBLAS_LIBRARY openblas
-			HINTS ${CBLAS_LIBRARY_PATH}
-		)
-		find_library(CBLAS_LIBRARY cblas
-			HINTS ${CBLAS_LIBRARY_PATH}
-		)
-		find_library(CLAPACK_LIBRARY lapack
-			HINTS ${CBLAS_LIBRARY_PATH}
-		)
-		find_library(ATLAS_LIBRARY atlas
-			HINTS ${CBLAS_LIBRARY_PATH}
-		)
-		mark_as_advanced(
-			OPENBLAS_LIBRARY
-			CBLAS_LIBRARY
-			CLAPACK_LIBRARY
-			ATLAS_LIBRARY
-		)
-		
-		find_file(CBLAS_INCLUDES cblas.h 
+        set(CBLAS_VENDOR "MKL")
+
+        find_library(CBLAS_LIBRARY1 NAMES mkl_intel_lp64
+                     PATHS ${CBLAS_LIBRARY_PATH}
+        )
+
+        find_library(CBLAS_LIBRARY2 mkl_sequential
+                     PATHS ${CBLAS_LIBRARY_PATH}
+        )
+
+        find_library(CBLAS_LIBRARY3 NAMES mkl_core
+                     PATHS ${CBLAS_LIBRARY_PATH}
+        )
+        SET(CBLAS_LIBRARIES ${CBLAS_LIBRARY1};${CBLAS_LIBRARY2};${CBLAS_LIBRARY3})
+
+
+		find_file(CBLAS_INCLUDES mkl_cblas.h 
 			PATHS ${CBLAS_INCLUDE_PATH}
 		)
 
-		if( OPENBLAS_LIBRARY AND CBLAS_INCLUDES)
-			set(CBLAS_VENDOR "OpenBLAS")
-			set(CBLAS_LIBRARIES ${OPENBLAS_LIBRARY})
-		elseif( CBLAS_LIBRARY AND CLAPACK_LIBRARY AND ATLAS_LIBRARY AND CBLAS_INCLUDES)
-			set(CBLAS_VENDOR "ATLAS")
-			set(CBLAS_LIBRARIES ${CLAPACK_LIBRARY} ${CBLAS_LIBRARY} ${ATLAS_LIBRARY})
-		elseif( CBLAS_LIBRARY AND CBLAS_INCLUDES)
+#        message(STATUS "CBLAS FOUND: " ${CBLAS_VENDOR})
+#        message(STATUS "CBLAS include file " ${CBLAS_INCLUDES} )
+#        message(STATUS "CBLAS library files " ${CBLAS_LIBRARIES} )
+
 			#check that we can compile a basic program with the libraries we have found
 			#vendor versions might come with additional libraries which would be bad.
+            message(STATUS "CBLAS Vendor: ... testing MKL")
 			try_compile(CBLAS_COMPILE 
 				"${PROJECT_BINARY_DIR}/cBlasCheck"
 				"${CMAKE_SOURCE_DIR}/cBlasCheck.cpp"
 				CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${CBLAS_INCLUDE_PATH}"
-				LINK_LIBRARIES ${CBLAS_LIBRARY}
+				LINK_LIBRARIES ${CBLAS_LIBRARIES}
 			)
-			if(CBLAS_COMPILE)
-				set(CBLAS_VENDOR "GENERIC")
-				set(CBLAS_LIBRARIES ${CBLAS_LIBRARY})
-			else()
+			if(NOT CBLAS_COMPILE)
 				message(WARNING "Can not compile basic program with cblas library")
+                SET(CBLAS_VENDOR FALSE)
 			endif()
-		endif()
-	endif()
 	
 	if(CBLAS_VENDOR)
 		message(STATUS "CBLAS FOUND: " ${CBLAS_VENDOR})
@@ -494,11 +486,11 @@ install(EXPORT SharkTargets DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 #                  Configure the Shark.h file
 #####################################################################
 configure_file (
-	"${CMAKE_SOURCE_DIR}/include/shark/Core/Shark.h.in"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/shark/Core/Shark.h.in"
 	"${CMAKE_BINARY_DIR}/include/shark/Core/Shark.h"
 )
 install(FILES
-	"${CMAKE_BINARY_DIR}/include/shark/Core/Shark.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/include/shark/Core/Shark.h"
 	DESTINATION "${SHARK_INSTALL_INCLUDE_DIR}/shark/Core/" COMPONENT deV
 )
 
